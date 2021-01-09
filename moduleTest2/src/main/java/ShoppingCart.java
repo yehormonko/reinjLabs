@@ -8,9 +8,7 @@ import java.util.List;
  * Containing items and calculating price.
  */
 public class ShoppingCart {
-    public static enum ItemType {NEW, REGULAR, SECOND_FREE, SALE}
-
-    ;
+    public enum ItemType {NEW, REGULAR, SECOND_FREE, SALE}
 
     /**
      * Tests all class methods.
@@ -35,12 +33,15 @@ public class ShoppingCart {
      * @throws IllegalArgumentException if some value is wrong
      */
     public void addItem(String title, double price, int quantity, ItemType type) {
-        if (title == null || title.length() == 0 || title.length() > 32)
+        if (title == null || title.length() == 0 || title.length() > 32) {
             throw new IllegalArgumentException("Illegal title");
-        if (price < 0.01)
+        }
+        if (price < 0.01) {
             throw new IllegalArgumentException("Illegal price");
-        if (quantity <= 0)
+        }
+        if (quantity <= 0) {
             throw new IllegalArgumentException("Illegal quantity");
+        }
         Item item = new Item();
         item.title = title;
         item.price = price;
@@ -68,7 +69,7 @@ public class ShoppingCart {
     public String formatTicket() {
         if (items.size() == 0)
             return "No items.";
-        List<String[]> lines = new ArrayList<String[]>();
+        List<String[]> lines = new ArrayList<>();
         String[] header = {"#", "Item", "Price", "Quan.", "Discount", "Total"};
         int[] align = new int[]{1, -1, 1, 1, 1, 1};
         // formatting each line
@@ -82,7 +83,7 @@ public class ShoppingCart {
                     item.title,
                     MONEY.format(item.price),
                     String.valueOf(item.quantity),
-                    (discount == 0) ? "-" : (String.valueOf(discount) + "%"),
+                    (discount == 0) ? "-" : (discount + "%"),
                     MONEY.format(itemTotal)
             });
             total += itemTotal;
@@ -92,41 +93,46 @@ public class ShoppingCart {
         // column max length
         int[] width = new int[]{0, 0, 0, 0, 0, 0};
         for (String[] line : lines)
-            for (int i = 0; i < line.length; i++)
-                width[i] = (int) Math.max(width[i], line[i].length());
-        for (int i = 0; i < header.length; i++)
-            width[i] = (int) Math.max(width[i], header[i].length());
-        for (int i = 0; i < footer.length; i++)
-            width[i] = (int) Math.max(width[i], footer[i].length());
+            adjustColumnWidth(width, line);
+        adjustColumnWidth(width, header);
+        adjustColumnWidth(width, footer);
         // line length
         int lineLength = width.length - 1;
-        for (int w : width)
+        for (int w : width) {
             lineLength += w;
+        }
         StringBuilder sb = new StringBuilder();
         // header
-        for (int i = 0; i < header.length; i++)
-            appendFormatted(sb, header[i], align[i], width[i]);
-        sb.append("\n");
-        // separator
-        for (int i = 0; i < lineLength; i++)
-            sb.append("-");
-        sb.append("\n");
+        appendFormattedLine(sb, header, align, width, true);
+        appendSeparator(sb, lineLength);
         // lines
-        for (String[] line : lines) {
-            for (int i = 0; i < line.length; i++)
-                appendFormatted(sb, line[i], align[i], width[i]);
-            sb.append("\n");
-        }
-        if (lines.size() > 0) {
-            // separator
-            for (int i = 0; i < lineLength; i++)
-                sb.append("-");
-            sb.append("\n");
+        for (String[] ignored : lines) {
+            appendSeparator(sb, lineLength);
         }
         // footer
-        for (int i = 0; i < footer.length; i++)
-            appendFormatted(sb, footer[i], align[i], width[i]);
+        appendFormattedLine(sb, footer, align, width, false);
         return sb.toString();
+    }
+
+    private void appendSeparator(StringBuilder sb, int lineLength) {
+        for (int i = 0; i < lineLength; i++) {
+            sb.append("\n");
+        }
+    }
+
+    private void adjustColumnWidth(int[] width, String[] columns) {
+        for (int i = 0; i < width.length; i++) {
+            width[i] = Math.max(width[i], columns[i].length());
+        }
+    }
+
+    private void appendFormattedLine(StringBuilder sb, String[] line, int[] align, int[] width, boolean newLine) {
+        for (int i = 0; i < line.length; i++) {
+            appendFormatted(sb, line[i], align[i], width[i]);
+        }
+        if (newLine) {
+            sb.append("\n");
+        }
     }
 
     // --- private section -----------------------------------------------------
@@ -145,17 +151,20 @@ public class ShoppingCart {
      * @param align -1 for align left, 0 for center and +1 for align right.
      */
     public static void appendFormatted(StringBuilder sb, String value, int align, int width) {
-        if (value.length() > width)
+        if (value.length() > width) {
             value = value.substring(0, width);
+        }
         int before = (align == 0)
                 ? (width - value.length()) / 2
                 : (align == -1) ? 0 : width - value.length();
         int after = width - value.length() - before;
-        while (before-- > 0)
+        while (before-- > 0) {
             sb.append(" ");
+        }
         sb.append(value);
-        while (after-- > 0)
+        while (after-- > 0) {
             sb.append(" ");
+        }
         sb.append(" ");
     }
 
@@ -183,10 +192,9 @@ public class ShoppingCart {
                 discount = 70;
                 break;
         }
-        if (discount < 80) {
-            discount += quantity / 10;
-            if (discount > 80)
-                discount = 80;
+        discount += quantity / 10;
+        if (discount > 80) {
+            discount = 80;
         }
         return discount;
     }
@@ -204,5 +212,5 @@ public class ShoppingCart {
     /**
      * Container for added items
      */
-    private List<Item> items = new ArrayList<Item>();
+    private List<Item> items = new ArrayList<>();
 }
